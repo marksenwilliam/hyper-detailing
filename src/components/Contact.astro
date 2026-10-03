@@ -15,10 +15,10 @@ import { PUBLIC_TURNSTILE_SITEKEY } from "astro:env/client";
 
 const endpoint = "/api/lead";
 
-// Empty until the Turnstile keys are in the environment. The widget and its
-// script then stay out of the page entirely, rather than rendering a box that
-// can never resolve — /api/lead fails open to match, so the form keeps working
-// either way.
+// Empty until the sitekey is in the environment, and the widget and its script
+// then stay out of the page entirely. /api/lead tolerates that only in local
+// development: a production build rejects every submission that lacks a
+// verified token, so a deployment needs both the sitekey and the secret.
 const turnstileSitekey = PUBLIC_TURNSTILE_SITEKEY ?? "";
 ---
 
