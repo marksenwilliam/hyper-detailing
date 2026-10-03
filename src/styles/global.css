@@ -188,6 +188,17 @@ html {
   scroll-padding-top: calc(var(--header-offset) + var(--header-height) + 1em);
 }
 
+/* Hide the page scrollbar; the page still scrolls with wheel, touch and keyboard */
+html {
+  -ms-overflow-style: none; /* IE and legacy Edge */
+  scrollbar-width: none; /* Firefox, Chrome 121+, Safari 18.2+ */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* older Chrome, Safari and Opera */
+}
+
 body {
   font-family: var(--font-body);
   font-size: var(--size-font);
