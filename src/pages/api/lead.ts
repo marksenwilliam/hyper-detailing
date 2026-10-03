@@ -73,19 +73,19 @@ const ALLOWED_HOSTNAMES = new Set([
   ...(import.meta.env.PROD ? [] : ["localhost", "127.0.0.1"]),
 ]);
 
-// Two deliberate fail-open paths, both logged:
+// Fails closed, as Cloudflare's integration flow requires: anything short of a
+// confirmed, in-scope success turns the request away — no secret, no token,
+// Cloudflare slow, unreachable or answering with an error. (This used to fail
+// open on a missing secret and on an outage, which is how the bot check sat
+// switched off in production without anyone noticing.) A rejected visitor is
+// told to ring instead, see the `bot_check_failed` message in Contact.astro.
 //
-// 1. TURNSTILE_SECRET_KEY unset — an unconfigured deployment would otherwise turn
-//    every booking away, which is the same trap the GHL check below avoids.
-// 2. Cloudflare unreachable — losing a real customer to an outage they can
-//    neither see nor fix is worse than letting a bot through.
-//
-// The honeypot above stays as the second layer in both cases. A token that is
-// present and genuinely rejected is still a hard no.
+// The one leniency is a missing secret in local development, so the form still
+// works without Turnstile keys; a production build never gets it.
 const verifyTurnstile = async (token: string, ip: string | null) => {
   if (!TURNSTILE_SECRET_KEY) {
-    console.error("[lead] TURNSTILE_SECRET_KEY is unset — the bot check did not run");
-    return true;
+    console.error("[lead] TURNSTILE_SECRET_KEY is unset — the bot check cannot run");
+    return !import.meta.env.PROD;
   }
   if (!token) return false;
 
@@ -93,7 +93,12 @@ const verifyTurnstile = async (token: string, ip: string | null) => {
   if (ip) form.set("remoteip", ip);
 
   try {
-    const res = await fetch(TURNSTILE_VERIFY, { method: "POST", body: form });
+    const res = await fetch(TURNSTILE_VERIFY, {
+      method: "POST",
+      body: form,
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`siteverify answered ${res.status}`);
     const outcome = (await res.json()) as {
       success?: boolean;
       hostname?: string;
@@ -119,7 +124,7 @@ const verifyTurnstile = async (token: string, ip: string | null) => {
     return true;
   } catch (cause) {
     console.error("[lead] Turnstile verification could not run:", cause);
-    return true;
+    return false;
   }
 };
 

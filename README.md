@@ -42,8 +42,11 @@ Verified on the production build (`npm run build` + `astro preview`):
   strictly necessary and sits outside the consent categories. Keys are
   `PUBLIC_TURNSTILE_SITEKEY` and `TURNSTILE_SECRET_KEY`; the token is redeemed
   server-side in `/api/lead`, which also checks the hostname and the `booking`
-  action, and fails open with a log line when the secret is unset or Cloudflare
-  is unreachable. The honeypot field remains as the second layer.
+  action, and fails closed: a missing secret, a missing or rejected token, or
+  an unreachable Cloudflare all turn the booking away (the visitor is told to
+  ring instead). Both keys are therefore required in production; locally the
+  check is skipped when the secret is unset. The honeypot field remains as the
+  second layer.
 - **No dev tooling in the build** — the Agentation widget, React and the
   `localhost:4747` probe exist in `npm run dev` only.
 - **axe-core** (WCAG 2.x A/AA + best-practice): zero violations on `/`,
