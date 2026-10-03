@@ -40,7 +40,7 @@ Verified on the production build (`npm run build` + `astro preview`):
   the widget on **pre-clearance off**: that setting is the only thing that makes
   Turnstile set a `cf_clearance` cookie, and it is why the check counts as
   strictly necessary and sits outside the consent categories. Keys are
-  `PUBLIC_TURNSTILE_SITEKEY` and `TURNSTILE_SECRET`; the token is redeemed
+  `PUBLIC_TURNSTILE_SITEKEY` and `TURNSTILE_SECRET_KEY`; the token is redeemed
   server-side in `/api/lead`, which also checks the hostname and the `booking`
   action, and fails open with a log line when the secret is unset or Cloudflare
   is unreachable. The honeypot field remains as the second layer.

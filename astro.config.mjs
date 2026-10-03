@@ -42,7 +42,7 @@ export default defineConfig({
       // browser. Optional for the same reason as the GHL pair above: a
       // deployment without them still has to serve a working form.
       PUBLIC_TURNSTILE_SITEKEY: envField.string({ context: 'client', access: 'public', optional: true }),
-      TURNSTILE_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+      TURNSTILE_SECRET_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
 

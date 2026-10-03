@@ -9,7 +9,7 @@
 // contact with the same e-mail/phone) → if there is a message, attach it as a
 // note on the contact. The reg.nr lands in the custom field {{contact.reg_nr}}.
 import type { APIRoute } from "astro";
-import { GHL_PIT, GHL_LOCATION_ID, TURNSTILE_SECRET } from "astro:env/server";
+import { GHL_PIT, GHL_LOCATION_ID, TURNSTILE_SECRET_KEY } from "astro:env/server";
 
 export const prerender = false;
 
@@ -75,7 +75,7 @@ const ALLOWED_HOSTNAMES = new Set([
 
 // Two deliberate fail-open paths, both logged:
 //
-// 1. TURNSTILE_SECRET unset — an unconfigured deployment would otherwise turn
+// 1. TURNSTILE_SECRET_KEY unset — an unconfigured deployment would otherwise turn
 //    every booking away, which is the same trap the GHL check below avoids.
 // 2. Cloudflare unreachable — losing a real customer to an outage they can
 //    neither see nor fix is worse than letting a bot through.
@@ -83,13 +83,13 @@ const ALLOWED_HOSTNAMES = new Set([
 // The honeypot above stays as the second layer in both cases. A token that is
 // present and genuinely rejected is still a hard no.
 const verifyTurnstile = async (token: string, ip: string | null) => {
-  if (!TURNSTILE_SECRET) {
-    console.error("[lead] TURNSTILE_SECRET is unset — the bot check did not run");
+  if (!TURNSTILE_SECRET_KEY) {
+    console.error("[lead] TURNSTILE_SECRET_KEY is unset — the bot check did not run");
     return true;
   }
   if (!token) return false;
 
-  const form = new URLSearchParams({ secret: TURNSTILE_SECRET, response: token });
+  const form = new URLSearchParams({ secret: TURNSTILE_SECRET_KEY, response: token });
   if (ip) form.set("remoteip", ip);
 
   try {
